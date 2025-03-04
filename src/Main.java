@@ -25,7 +25,7 @@ public class Main {
         calculatorPoint(cardsFirstJoueur, cardsSecondsJoueur);
     }
 
-    private static void calculatorPoint(List<Card> cardsFirstJoueur, List<Card> cardsSecondJoueur) {
+    public static void calculatorPoint(List<Card> cardsFirstJoueur, List<Card> cardsSecondJoueur) {
         AtomicInteger pointsFirstJoueur = new AtomicInteger();
         AtomicInteger pointsSecondJoueur = new AtomicInteger();
 
