@@ -61,16 +61,22 @@ public class Main {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        if (!pairsFirstJoueur.isEmpty()) {
+        if (pairsFirstJoueur.size() == 2) {
+            pointsFirstJoueur.set(4);
+            System.out.println("Premier joueur possède deux paires: " + pairsFirstJoueur);
+        } else if (!pairsFirstJoueur.isEmpty()) {
             pointsFirstJoueur.set(2);
-            System.out.println("Premier joueur possède " + pairsFirstJoueur.size() + " paire(s): " + pairsFirstJoueur);
+            System.out.println("Premier joueur possède une paire: " + pairsFirstJoueur);
         } else {
             System.out.println("Premier joueur ne possède pas de paire.");
         }
 
-        if (!pairsSecondJoueur.isEmpty()) {
+        if (pairsSecondJoueur.size() == 2) {
+            pointsSecondJoueur.set(4);
+            System.out.println("Deuxième joueur possède deux paires: " + pairsSecondJoueur);
+        } else if (!pairsSecondJoueur.isEmpty()) {
             pointsSecondJoueur.set(2);
-            System.out.println("Deuxième joueur possède " + pairsSecondJoueur.size() + " paire(s): " + pairsSecondJoueur);
+            System.out.println("Deuxième joueur possède une paire: " + pairsSecondJoueur);
         } else {
             System.out.println("Deuxième joueur ne possède pas de paire.");
         }
@@ -78,6 +84,7 @@ public class Main {
         System.out.println("Points du premier joueur: " + pointsFirstJoueur);
         System.out.println("Points du deuxième joueur: " + pointsSecondJoueur);
     }
+
 
 
 
