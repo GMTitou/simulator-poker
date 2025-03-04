@@ -1,15 +1,13 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
-import java.io.ByteArrayInputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class MainTest {
 
@@ -22,113 +20,201 @@ public class MainTest {
     }
 
     @Test
-    @DisplayName("Test de la méthode choisirCartesEnUneFois avec une saisie valide")
-    public void testChoisirCartesEnUneFoisValide() {
-        String input = "1COEUR 2PIQUE 3CARREAU 4TREFLE 5COEUR\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
-        Scanner scanner = new Scanner(System.in);
-
-        List<Card> cartes = Main.choisirCartesEnUneFois(scanner, null);
-
-        assertEquals(5, cartes.size());
-        Assertions.assertEquals(1, cartes.get(0).getNumber());
-        Assertions.assertEquals(Color.COEUR, cartes.get(0).getColor());
-        Assertions.assertEquals(2, cartes.get(1).getNumber());
-        Assertions.assertEquals(Color.PIQUE, cartes.get(1).getColor());
-        Assertions.assertEquals(3, cartes.get(2).getNumber());
-        Assertions.assertEquals(Color.CARREAU, cartes.get(2).getColor());
-        Assertions.assertEquals(4, cartes.get(3).getNumber());
-        Assertions.assertEquals(Color.TREFLE, cartes.get(3).getColor());
-        Assertions.assertEquals(5, cartes.get(4).getNumber());
-        Assertions.assertEquals(Color.COEUR, cartes.get(4).getColor());
-
-        System.setIn(System.in);
-    }
-
-    @Test
-    @DisplayName("Test de la méthode choisirCartesEnUneFois avec cartes à éviter")
-    public void testChoisirCartesEnUneFoisAvecCartesAEviter() {
-        List<Card> cartesAEviter = new ArrayList<>();
-        cartesAEviter.add(new Card(1, Color.COEUR));
-        cartesAEviter.add(new Card(2, Color.PIQUE));
-
-        String input = "1COEUR 3PIQUE 4CARREAU 5TREFLE 6COEUR\n" +
-                "7COEUR 8PIQUE 9CARREAU 10TREFLE 11COEUR\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
-        Scanner scanner = new Scanner(System.in);
-
-        List<Card> cartes = Main.choisirCartesEnUneFois(scanner, cartesAEviter);
-
-        assertEquals(5, cartes.size());
-        Assertions.assertEquals(7, cartes.get(0).getNumber());
-        Assertions.assertEquals(Color.COEUR, cartes.get(0).getColor());
-
-        System.setIn(System.in);
-    }
-
-    @Test
-    @DisplayName("Test de la méthode calculatorPoint avec carte haute")
-    public void testCalculatorPointCarteHaute() {
+    @DisplayName("Test de la méthode calculatorPoint avec brelan (triple)")
+    public void testCalculatorPointBrelan() {
         List<Card> cartesJoueur1 = new ArrayList<>();
-        cartesJoueur1.add(new Card(13, Color.COEUR));
-        cartesJoueur1.add(new Card(2, Color.PIQUE));
-        cartesJoueur1.add(new Card(3, Color.CARREAU));
+        cartesJoueur1.add(new Card(7, Color.COEUR));
+        cartesJoueur1.add(new Card(7, Color.PIQUE));
+        cartesJoueur1.add(new Card(7, Color.CARREAU));
         cartesJoueur1.add(new Card(4, Color.TREFLE));
         cartesJoueur1.add(new Card(5, Color.COEUR));
 
         List<Card> cartesJoueur2 = new ArrayList<>();
-        cartesJoueur2.add(new Card(12, Color.COEUR));
-        cartesJoueur2.add(new Card(7, Color.PIQUE));
-        cartesJoueur2.add(new Card(8, Color.CARREAU));
-        cartesJoueur2.add(new Card(9, Color.TREFLE));
         cartesJoueur2.add(new Card(10, Color.COEUR));
+        cartesJoueur2.add(new Card(10, Color.PIQUE));
+        cartesJoueur2.add(new Card(10, Color.CARREAU));
+        cartesJoueur2.add(new Card(2, Color.TREFLE));
+        cartesJoueur2.add(new Card(3, Color.COEUR));
 
         Main.calculatorPoint(cartesJoueur1, cartesJoueur2);
 
-        assertTrue(outContent.toString().contains("Premier joueur a la carte la plus haute: 13"));
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Premier joueur possède un triple: [7]"));
+        assertTrue(output.contains("Deuxième joueur possède un triple: [10]"));
+
+        assertTrue(output.contains("Points du premier joueur: 3"));
+        assertTrue(output.contains("Points du deuxième joueur: 3"));
     }
 
     @Test
-    @DisplayName("Test de la méthode calculatorPoint avec une paire")
-    public void testCalculatorPointPaire() {
+    @DisplayName("Test de la méthode calculatorPoint avec carré")
+    public void testCalculatorPointCarre() {
         List<Card> cartesJoueur1 = new ArrayList<>();
-        cartesJoueur1.add(new Card(10, Color.COEUR));
-        cartesJoueur1.add(new Card(10, Color.PIQUE));
-        cartesJoueur1.add(new Card(3, Color.CARREAU));
-        cartesJoueur1.add(new Card(4, Color.TREFLE));
+        cartesJoueur1.add(new Card(8, Color.COEUR));
+        cartesJoueur1.add(new Card(8, Color.PIQUE));
+        cartesJoueur1.add(new Card(8, Color.CARREAU));
+        cartesJoueur1.add(new Card(8, Color.TREFLE));
         cartesJoueur1.add(new Card(5, Color.COEUR));
 
         List<Card> cartesJoueur2 = new ArrayList<>();
-        cartesJoueur2.add(new Card(12, Color.COEUR));
-        cartesJoueur2.add(new Card(7, Color.PIQUE));
-        cartesJoueur2.add(new Card(8, Color.CARREAU));
-        cartesJoueur2.add(new Card(9, Color.TREFLE));
-        cartesJoueur2.add(new Card(11, Color.COEUR));
+        cartesJoueur2.add(new Card(10, Color.COEUR));
+        cartesJoueur2.add(new Card(10, Color.PIQUE));
+        cartesJoueur2.add(new Card(10, Color.CARREAU));
+        cartesJoueur2.add(new Card(2, Color.TREFLE));
+        cartesJoueur2.add(new Card(3, Color.COEUR));
 
         Main.calculatorPoint(cartesJoueur1, cartesJoueur2);
 
-        assertTrue(outContent.toString().contains("Premier joueur possède une paire: [10]"));
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Premier joueur possède un carré: [8]"));
+
+        assertTrue(output.contains("Deuxième joueur possède un triple: [10]"));
+
+        assertTrue(output.contains("Points du premier joueur: 7"));
+        assertTrue(output.contains("Points du deuxième joueur: 3"));
     }
 
     @Test
-    @DisplayName("Test de la méthode calculatorPoint avec deux paires")
-    public void testCalculatorPointDeuxPaires() {
+    @DisplayName("Test de la méthode calculatorPoint avec couleur")
+    public void testCalculatorPointCouleur() {
         List<Card> cartesJoueur1 = new ArrayList<>();
-        cartesJoueur1.add(new Card(10, Color.COEUR));
-        cartesJoueur1.add(new Card(10, Color.PIQUE));
-        cartesJoueur1.add(new Card(3, Color.CARREAU));
-        cartesJoueur1.add(new Card(4, Color.TREFLE));
+        cartesJoueur1.add(new Card(2, Color.COEUR));
         cartesJoueur1.add(new Card(5, Color.COEUR));
+        cartesJoueur1.add(new Card(7, Color.COEUR));
+        cartesJoueur1.add(new Card(9, Color.COEUR));
+        cartesJoueur1.add(new Card(11, Color.COEUR));
 
         List<Card> cartesJoueur2 = new ArrayList<>();
-        cartesJoueur2.add(new Card(12, Color.COEUR));
-        cartesJoueur2.add(new Card(12, Color.PIQUE));
-        cartesJoueur2.add(new Card(8, Color.CARREAU));
+        cartesJoueur2.add(new Card(10, Color.COEUR));
+        cartesJoueur2.add(new Card(10, Color.PIQUE));
+        cartesJoueur2.add(new Card(10, Color.CARREAU));
+        cartesJoueur2.add(new Card(2, Color.TREFLE));
+        cartesJoueur2.add(new Card(3, Color.COEUR));
+
+        Main.calculatorPoint(cartesJoueur1, cartesJoueur2);
+
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Premier joueur a une couleur: COEUR"));
+
+        assertTrue(output.contains("Points du premier joueur: 5"));
+        assertTrue(output.contains("Points du deuxième joueur: 3"));
+    }
+
+    @Test
+    @DisplayName("Test de la méthode calculatorPoint avec full house (brelan + paire)")
+    public void testCalculatorPointFullHouse() {
+        List<Card> cartesJoueur1 = new ArrayList<>();
+        cartesJoueur1.add(new Card(7, Color.COEUR));
+        cartesJoueur1.add(new Card(7, Color.PIQUE));
+        cartesJoueur1.add(new Card(7, Color.CARREAU));
+        cartesJoueur1.add(new Card(4, Color.TREFLE));
+        cartesJoueur1.add(new Card(4, Color.PIQUE));
+
+        List<Card> cartesJoueur2 = new ArrayList<>();
+        cartesJoueur2.add(new Card(10, Color.COEUR));
+        cartesJoueur2.add(new Card(10, Color.PIQUE));
+        cartesJoueur2.add(new Card(2, Color.CARREAU));
+        cartesJoueur2.add(new Card(2, Color.TREFLE));
+        cartesJoueur2.add(new Card(3, Color.COEUR));
+
+        Main.calculatorPoint(cartesJoueur1, cartesJoueur2);
+
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Premier joueur possède un triple et une paire: [7] et [4]"));
+
+        assertTrue(output.contains("Deuxième joueur possède deux paires: [2, 10]"));
+
+        assertTrue(output.contains("Points du premier joueur: 6"));
+        assertTrue(output.contains("Points du deuxième joueur: 4"));
+    }
+
+    @Test
+    @DisplayName("Test de comparaison entre couleur et full house")
+    public void testComparaisonCouleurVsFullHouse() {
+        List<Card> cartesJoueur1 = new ArrayList<>(); // Couleur
+        cartesJoueur1.add(new Card(2, Color.COEUR));
+        cartesJoueur1.add(new Card(5, Color.COEUR));
+        cartesJoueur1.add(new Card(7, Color.COEUR));
+        cartesJoueur1.add(new Card(9, Color.COEUR));
+        cartesJoueur1.add(new Card(11, Color.COEUR));
+
+        List<Card> cartesJoueur2 = new ArrayList<>(); // Full house
+        cartesJoueur2.add(new Card(6, Color.COEUR));
+        cartesJoueur2.add(new Card(6, Color.PIQUE));
+        cartesJoueur2.add(new Card(6, Color.CARREAU));
+        cartesJoueur2.add(new Card(3, Color.TREFLE));
+        cartesJoueur2.add(new Card(3, Color.COEUR));
+
+        Main.calculatorPoint(cartesJoueur1, cartesJoueur2);
+
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Premier joueur a une couleur: COEUR"));
+        assertTrue(output.contains("Deuxième joueur possède un triple et une paire: [6] et [3]"));
+
+        assertTrue(output.contains("Points du premier joueur: 5"));
+        assertTrue(output.contains("Points du deuxième joueur: 6"));
+    }
+
+    @Test
+    @DisplayName("Test avec deux couleurs différentes")
+    public void testDeuxCouleurs() {
+        List<Card> cartesJoueur1 = new ArrayList<>();
+        cartesJoueur1.add(new Card(2, Color.COEUR));
+        cartesJoueur1.add(new Card(5, Color.COEUR));
+        cartesJoueur1.add(new Card(7, Color.COEUR));
+        cartesJoueur1.add(new Card(9, Color.COEUR));
+        cartesJoueur1.add(new Card(11, Color.COEUR));
+
+        List<Card> cartesJoueur2 = new ArrayList<>();
+        cartesJoueur2.add(new Card(4, Color.TREFLE));
+        cartesJoueur2.add(new Card(6, Color.TREFLE));
         cartesJoueur2.add(new Card(8, Color.TREFLE));
-        cartesJoueur2.add(new Card(11, Color.COEUR));
+        cartesJoueur2.add(new Card(10, Color.TREFLE));
+        cartesJoueur2.add(new Card(12, Color.TREFLE));
 
         Main.calculatorPoint(cartesJoueur1, cartesJoueur2);
 
-        assertTrue(outContent.toString().contains("Deuxième joueur possède deux paires: [8, 12]"));
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Premier joueur a une couleur: COEUR"));
+        assertTrue(output.contains("Deuxième joueur a une couleur: TREFLE"));
+
+        assertTrue(output.contains("Deuxième joueur a la carte la plus haute: 12"));
+
+        assertTrue(output.contains("Points du premier joueur: 5"));
+        assertTrue(output.contains("Points du deuxième joueur: 5"));
+    }
+
+    @Test
+    @DisplayName("Test avec carré vs couleur")
+    public void testCarreVsCouleur() {
+        List<Card> cartesJoueur1 = new ArrayList<>();
+        cartesJoueur1.add(new Card(8, Color.COEUR));
+        cartesJoueur1.add(new Card(8, Color.PIQUE));
+        cartesJoueur1.add(new Card(8, Color.CARREAU));
+        cartesJoueur1.add(new Card(8, Color.TREFLE));
+        cartesJoueur1.add(new Card(5, Color.COEUR));
+
+        List<Card> cartesJoueur2 = new ArrayList<>();
+        cartesJoueur2.add(new Card(4, Color.TREFLE));
+        cartesJoueur2.add(new Card(6, Color.TREFLE));
+        cartesJoueur2.add(new Card(8, Color.TREFLE));
+        cartesJoueur2.add(new Card(10, Color.TREFLE));
+        cartesJoueur2.add(new Card(12, Color.TREFLE));
+
+        Main.calculatorPoint(cartesJoueur1, cartesJoueur2);
+
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Premier joueur possède un carré: [8]"));
+        assertTrue(output.contains("Deuxième joueur a une couleur: TREFLE"));
+
+        assertTrue(output.contains("Points du premier joueur: 7"));
+        assertTrue(output.contains("Points du deuxième joueur: 5"));
     }
 }

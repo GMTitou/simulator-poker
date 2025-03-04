@@ -61,13 +61,23 @@ public class Main {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
+        List<Integer> carreFirstJoueur = countFirstJoueur.entrySet().stream()
+                .filter(entry -> entry.getValue() == 4)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        List<Integer> carreSecondJoueur = countSecondJoueur.entrySet().stream()
+                .filter(entry -> entry.getValue() == 4)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
         List<Integer> pairsFirstJoueur = countFirstJoueur.entrySet().stream()
-                .filter(entry -> entry.getValue() == 2 && !triplesFirstJoueur.contains(entry.getKey()))
+                .filter(entry -> entry.getValue() == 2 && !triplesFirstJoueur.contains(entry.getKey()) && !carreFirstJoueur.contains(entry.getKey()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
         List<Integer> pairsSecondJoueur = countSecondJoueur.entrySet().stream()
-                .filter(entry -> entry.getValue() == 2 && !triplesSecondJoueur.contains(entry.getKey()))
+                .filter(entry -> entry.getValue() == 2 && !triplesSecondJoueur.contains(entry.getKey()) && !carreSecondJoueur.contains(entry.getKey()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
@@ -77,14 +87,61 @@ public class Main {
         boolean isSameColorSecondJoueur = cardsSecondJoueur.stream()
                 .allMatch(card -> card.getColor() == cardsSecondJoueur.get(0).getColor());
 
+        boolean isStraightFlushFirstJoueur = isSameColorFirstJoueur && isSequential(cardsFirstJoueur);
+        boolean isStraightFlushSecondJoueur = isSameColorSecondJoueur && isSequential(cardsSecondJoueur);
+
+        boolean isRoyalFlushFirstJoueur = isRoyalFlush(cardsFirstJoueur);
+        boolean isRoyalFlushSecondJoueur = isRoyalFlush(cardsSecondJoueur);
+
+        if (isRoyalFlushFirstJoueur) {
+            pointsFirstJoueur.set(10);
+            System.out.println("Premier joueur a une quinte flush royale: " + cardsFirstJoueur);
+        }
+
+        if (isRoyalFlushSecondJoueur) {
+            pointsSecondJoueur.set(10);
+            System.out.println("Deuxième joueur a une quinte flush royale: " + cardsSecondJoueur);
+        }
+
+        if (isStraightFlushFirstJoueur && !isRoyalFlushFirstJoueur) {
+            pointsFirstJoueur.set(9);
+            System.out.println("Premier joueur a une quinte flush: " + cardsFirstJoueur);
+        }
+
+        if (isStraightFlushSecondJoueur && !isRoyalFlushSecondJoueur) {
+            pointsSecondJoueur.set(9);
+            System.out.println("Deuxième joueur a une quinte flush: " + cardsSecondJoueur);
+        }
+
+
+        if (!isStraightFlushFirstJoueur && isSequential(cardsFirstJoueur)) {
+            pointsFirstJoueur.set(8);
+            System.out.println("Premier joueur a une suite (quinte): " + cardsFirstJoueur);
+        }
+
+        if (!isStraightFlushSecondJoueur && isSequential(cardsSecondJoueur)) {
+            pointsSecondJoueur.set(8);
+            System.out.println("Deuxième joueur a une suite (quinte): " + cardsSecondJoueur);
+        }
+
+
+        if (!carreFirstJoueur.isEmpty()) {
+            pointsFirstJoueur.set(7);
+            System.out.println("Premier joueur possède un carré: " + carreFirstJoueur);
+        }
+
+        if (!carreSecondJoueur.isEmpty()) {
+            pointsSecondJoueur.set(7);
+            System.out.println("Deuxième joueur possède un carré: " + carreSecondJoueur);
+        }
+
+
         if (pairsFirstJoueur.size() == 2) {
             pointsFirstJoueur.set(4);
             System.out.println("Premier joueur possède deux paires: " + pairsFirstJoueur);
         } else if (!pairsFirstJoueur.isEmpty()) {
             pointsFirstJoueur.set(2);
             System.out.println("Premier joueur possède une paire: " + pairsFirstJoueur);
-        } else {
-            System.out.println("Premier joueur ne possède pas de paire.");
         }
 
         if (pairsSecondJoueur.size() == 2) {
@@ -93,42 +150,61 @@ public class Main {
         } else if (!pairsSecondJoueur.isEmpty()) {
             pointsSecondJoueur.set(2);
             System.out.println("Deuxième joueur possède une paire: " + pairsSecondJoueur);
-        } else {
-            System.out.println("Deuxième joueur ne possède pas de paire.");
         }
 
         if (!triplesFirstJoueur.isEmpty()) {
-            if (!pairsFirstJoueur.isEmpty()) {
-                pointsFirstJoueur.set(5);
-                System.out.println("Premier joueur possède un triple et une paire: " + triplesFirstJoueur + " et " + pairsFirstJoueur);
-            } else {
-                pointsFirstJoueur.set(3);
-                System.out.println("Premier joueur possède un triple: " + triplesFirstJoueur);
-            }
+            pointsFirstJoueur.set(3);
+            System.out.println("Premier joueur possède un triple: " + triplesFirstJoueur);
         }
 
         if (!triplesSecondJoueur.isEmpty()) {
-            if (!pairsSecondJoueur.isEmpty()) {
-                pointsSecondJoueur.set(5);
-                System.out.println("Deuxième joueur possède un triple et une paire: " + triplesSecondJoueur + " et " + pairsSecondJoueur);
-            } else {
-                pointsSecondJoueur.set(3);
-                System.out.println("Deuxième joueur possède un triple: " + triplesSecondJoueur);
-            }
+            pointsSecondJoueur.set(3);
+            System.out.println("Deuxième joueur possède un triple: " + triplesSecondJoueur);
         }
 
-        if (isSameColorFirstJoueur) {
-            pointsFirstJoueur.set(6);
+
+        if (isSameColorFirstJoueur && !isStraightFlushFirstJoueur) {
+            pointsFirstJoueur.set(5);
             System.out.println("Premier joueur a une couleur: " + cardsFirstJoueur.get(0).getColor());
         }
 
-        if (isSameColorSecondJoueur) {
-            pointsSecondJoueur.set(6);
+        if (isSameColorSecondJoueur && !isStraightFlushSecondJoueur) {
+            pointsSecondJoueur.set(5);
             System.out.println("Deuxième joueur a une couleur: " + cardsSecondJoueur.get(0).getColor());
         }
 
+
         System.out.println("Points du premier joueur: " + pointsFirstJoueur);
         System.out.println("Points du deuxième joueur: " + pointsSecondJoueur);
+    }
+
+    private static boolean isRoyalFlush(List<Card> cards) {
+        List<Integer> royalFlushSequence = Arrays.asList(10, 11, 12, 13, 1);
+        List<Integer> sortedCards = cards.stream()
+                .map(Card::getNumber)
+                .sorted()
+                .toList();
+
+        if (sortedCards.size() != 5) {
+            return false;
+        }
+
+        return sortedCards.containsAll(royalFlushSequence);
+    }
+
+
+    private static boolean isSequential(List<Card> cards) {
+        List<Integer> sortedCards = cards.stream()
+                .map(Card::getNumber)
+                .sorted()
+                .collect(Collectors.toList());
+
+        for (int i = 1; i < sortedCards.size(); i++) {
+            if (sortedCards.get(i) != sortedCards.get(i - 1) + 1) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static List<Card> choisirCartesEnUneFois(Scanner scanner, List<Card> cartesAEviter) {

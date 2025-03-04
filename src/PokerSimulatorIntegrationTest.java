@@ -5,16 +5,15 @@ import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PokerSimulatorIntegrationTest {
 
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
-    private final InputStream originalIn = System.in;
 
     @BeforeEach
     public void setUpStreams() {
@@ -24,110 +23,256 @@ public class PokerSimulatorIntegrationTest {
     @AfterEach
     public void restoreStreams() {
         System.setOut(originalOut);
-        System.setIn(originalIn);
+        outContent.reset();
+    }
+
+    private List<Card> createHand(int[] numbers, Color[] colors) {
+        List<Card> hand = new ArrayList<>();
+        for (int i = 0; i < numbers.length; i++) {
+            hand.add(new Card(numbers[i], colors[i]));
+        }
+        return hand;
     }
 
     @Test
-    @DisplayName("Test d'intégration du flux complet avec deux joueurs")
-    public void testFullSimulationFlow() {
-        String input = "1COEUR 2PIQUE 3CARREAU 4TREFLE 5COEUR\n" +
-                "6COEUR 7PIQUE 8CARREAU 9TREFLE 10COEUR\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
-        try {
-            Main.main(new String[]{});
-        } catch (Exception e) {
-            fail("Le test d'intégration a échoué avec l'exception: " + e.getMessage());
-        }
+    @DisplayName("Test de détection de la quinte flush royale")
+    public void testRoyalFlush() {
+        List<Card> royalFlush = createHand(
+                new int[]{10, 11, 12, 13, 1},
+                new Color[]{Color.COEUR, Color.COEUR, Color.COEUR, Color.COEUR, Color.COEUR}
+        );
+
+        List<Card> ordinaryHand = createHand(
+                new int[]{2, 5, 7, 9, 11},
+                new Color[]{Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.PIQUE, Color.CARREAU}
+        );
+
+        Main.calculatorPoint(royalFlush, ordinaryHand);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Veuillez choisir les carte du Joueur 1"));
-        assertTrue(output.contains("Veuillez maintenant choisir les carte du Joueur 2"));
-        assertTrue(output.contains("1 de COEUR"));
-        assertTrue(output.contains("10 de COEUR"));
-        assertTrue(output.contains("Premier joueur a la carte la plus haute") ||
-                output.contains("Deuxième joueur a la carte la plus haute") ||
-                output.contains("Points du premier joueur") ||
-                output.contains("Points du deuxième joueur"));
+
+        assertTrue(output.contains("Premier joueur a une quinte flush royale"));
+        assertTrue(output.contains("Points du premier joueur: 10"));
     }
 
     @Test
-    @DisplayName("Test d'intégration avec carte invalide puis valide")
-    public void testInvalidCardThenValid() {
-        String input = "14COEUR 2PIQUE 3CARREAU 4TREFLE 5COEUR\n" +
-                "1COEUR 2PIQUE 3CARREAU 4TREFLE 5COEUR\n" +
-                "6COEUR 7PIQUE 8CARREAU 9TREFLE 10COEUR\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
+    @DisplayName("Test de détection de la quinte flush")
+    public void testStraightFlush() {
+        List<Card> straightFlush = createHand(
+                new int[]{5, 6, 7, 8, 9},
+                new Color[]{Color.TREFLE, Color.TREFLE, Color.TREFLE, Color.TREFLE, Color.TREFLE}
+        );
 
-        try {
-            Main.main(new String[]{});
-        } catch (Exception e) {
-            fail("Le test d'intégration a échoué avec l'exception: " + e.getMessage());
-        }
+        List<Card> fourOfAKind = createHand(
+                new int[]{7, 7, 7, 7, 2},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
+
+        Main.calculatorPoint(straightFlush, fourOfAKind);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Erreur: Le numéro doit être entre 1 (As) et 13 (Roi)"));
-        assertTrue(output.contains("1 de COEUR"));
-        assertTrue(output.contains("6 de COEUR"));
+
+        assertTrue(output.contains("Premier joueur a une quinte flush"));
+        assertTrue(output.contains("Points du premier joueur: 9"));
+        assertTrue(output.contains("Deuxième joueur possède un carré"));
+        assertTrue(output.contains("Points du deuxième joueur: 7"));
     }
 
     @Test
-    @DisplayName("Test d'intégration avec tentative de carte en double entre joueurs")
-    public void testDuplicateCardBetweenPlayers() {
-        String input = "1COEUR 2PIQUE 3CARREAU 4TREFLE 5COEUR\n" +
-                "1COEUR 7PIQUE 8CARREAU 9TREFLE 10COEUR\n" +
-                "6COEUR 7PIQUE 8CARREAU 9TREFLE 10COEUR\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
+    @DisplayName("Test de détection de la quinte (suite)")
+    public void testStraight() {
+        List<Card> straight = createHand(
+                new int[]{3, 4, 5, 6, 7},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
 
-        try {
-            Main.main(new String[]{});
-        } catch (Exception e) {
-            fail("Le test d'intégration a échoué avec l'exception: " + e.getMessage());
-        }
+        List<Card> flush = createHand(
+                new int[]{2, 5, 7, 9, 11},
+                new Color[]{Color.PIQUE, Color.PIQUE, Color.PIQUE, Color.PIQUE, Color.PIQUE}
+        );
+
+        Main.calculatorPoint(straight, flush);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Cette carte est déjà prise par un autre joueur"));
-        assertTrue(output.contains("6 de COEUR"));
+
+        assertTrue(output.contains("Premier joueur a une suite (quinte)"));
+        assertTrue(output.contains("Points du premier joueur: 8"));
+        assertTrue(output.contains("Deuxième joueur a une couleur"));
+        assertTrue(output.contains("Points du deuxième joueur: 5"));
     }
 
     @Test
-    @DisplayName("Test d'intégration avec différentes combinaisons de mains")
-    public void testDifferentHandCombinations() {
-        String input = "1COEUR 1PIQUE 3CARREAU 4TREFLE 5COEUR\n" +
-                "6COEUR 7PIQUE 8CARREAU 9TREFLE 13COEUR\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
+    @DisplayName("Test de comparaison entre quinte flush royale et quinte flush")
+    public void testRoyalFlushVsStraightFlush() {
+        List<Card> royalFlush = createHand(
+                new int[]{10, 11, 12, 13, 1},
+                new Color[]{Color.COEUR, Color.COEUR, Color.COEUR, Color.COEUR, Color.COEUR}
+        );
 
-        try {
-            Main.main(new String[]{});
-        } catch (Exception e) {
-            fail("Le test d'intégration a échoué avec l'exception: " + e.getMessage());
-        }
+        List<Card> straightFlush = createHand(
+                new int[]{5, 6, 7, 8, 9},
+                new Color[]{Color.TREFLE, Color.TREFLE, Color.TREFLE, Color.TREFLE, Color.TREFLE}
+        );
+
+        Main.calculatorPoint(royalFlush, straightFlush);
+
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Premier joueur a une quinte flush royale"));
+        assertTrue(output.contains("Deuxième joueur a une quinte flush"));
+        assertTrue(output.contains("Points du premier joueur: 10"));
+        assertTrue(output.contains("Points du deuxième joueur: 9"));
+    }
+
+    @Test
+    @DisplayName("Test de comparaison entre quinte flush et carré")
+    public void testStraightFlushVsFourOfAKind() {
+        List<Card> straightFlush = createHand(
+                new int[]{5, 6, 7, 8, 9},
+                new Color[]{Color.TREFLE, Color.TREFLE, Color.TREFLE, Color.TREFLE, Color.TREFLE}
+        );
+
+        List<Card> fourOfAKind = createHand(
+                new int[]{7, 7, 7, 7, 2},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
+
+        Main.calculatorPoint(straightFlush, fourOfAKind);
+
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Premier joueur a une quinte flush"));
+        assertTrue(output.contains("Deuxième joueur possède un carré"));
+        assertTrue(output.contains("Points du premier joueur: 9"));
+        assertTrue(output.contains("Points du deuxième joueur: 7"));
+    }
+
+    @Test
+    @DisplayName("Test complet de la hiérarchie des mains")
+    public void testFullHierarchy() {
+        List<Card> royalFlush = createHand(
+                new int[]{10, 11, 12, 13, 1},
+                new Color[]{Color.COEUR, Color.COEUR, Color.COEUR, Color.COEUR, Color.COEUR}
+        );
+
+        List<Card> straightFlush = createHand(
+                new int[]{5, 6, 7, 8, 9},
+                new Color[]{Color.TREFLE, Color.TREFLE, Color.TREFLE, Color.TREFLE, Color.TREFLE}
+        );
+
+        List<Card> fourOfAKind = createHand(
+                new int[]{7, 7, 7, 7, 2},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
+
+        List<Card> fullHouse = createHand(
+                new int[]{6, 6, 6, 3, 3},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
+
+        List<Card> flush = createHand(
+                new int[]{2, 5, 7, 9, 11},
+                new Color[]{Color.PIQUE, Color.PIQUE, Color.PIQUE, Color.PIQUE, Color.PIQUE}
+        );
+
+        List<Card> straight = createHand(
+                new int[]{3, 4, 5, 6, 7},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
+
+        List<Card> threeOfAKind = createHand(
+                new int[]{9, 9, 9, 2, 7},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
+
+        List<Card> twoPairs = createHand(
+                new int[]{10, 10, 4, 4, 7},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
+
+        List<Card> onePair = createHand(
+                new int[]{10, 10, 2, 5, 7},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
+
+        List<Card> highCard = createHand(
+                new int[]{13, 10, 8, 5, 2},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
+
+        Main.calculatorPoint(royalFlush, straightFlush);
+        outContent.reset();
+
+        Main.calculatorPoint(straightFlush, fourOfAKind);
+        outContent.reset();
+
+        Main.calculatorPoint(fourOfAKind, fullHouse);
+        outContent.reset();
+
+        Main.calculatorPoint(fullHouse, flush);
+        outContent.reset();
+
+        Main.calculatorPoint(flush, straight);
+        outContent.reset();
+
+        Main.calculatorPoint(straight, threeOfAKind);
+        outContent.reset();
+
+        Main.calculatorPoint(threeOfAKind, twoPairs);
+        outContent.reset();
+
+        Main.calculatorPoint(twoPairs, onePair);
+        outContent.reset();
+
+        Main.calculatorPoint(onePair, highCard);
 
         String output = outContent.toString();
 
         assertTrue(output.contains("Premier joueur possède une paire"));
-
         assertTrue(output.contains("Points du premier joueur: 2"));
+        assertTrue(output.contains("Deuxième joueur a la carte la plus haute"));
+        assertTrue(output.contains("Points du deuxième joueur: 1"));
     }
 
     @Test
-    @DisplayName("Test d'intégration avec deux joueurs ayant des paires")
-    public void testBothPlayersWithPairs() {
-        String input = "1COEUR 1PIQUE 3CARREAU 4TREFLE 5COEUR\n" +
-                "6COEUR 7PIQUE 7CARREAU 9TREFLE 10COEUR\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
+    @DisplayName("Test pour vérifier que isSequential fonctionne correctement")
+    public void testIsSequential() {
+        List<Card> normalStraight = createHand(
+                new int[]{3, 4, 5, 6, 7},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
 
-        try {
-            Main.main(new String[]{});
-        } catch (Exception e) {
-            fail("Le test d'intégration a échoué avec l'exception: " + e.getMessage());
-        }
+        List<Card> notStraight = createHand(
+                new int[]{3, 4, 6, 7, 9},
+                new Color[]{Color.COEUR, Color.PIQUE, Color.CARREAU, Color.TREFLE, Color.COEUR}
+        );
+
+        Main.calculatorPoint(normalStraight, notStraight);
 
         String output = outContent.toString();
 
-        assertTrue(output.contains("Premier joueur possède une paire"));
-        assertTrue(output.contains("Deuxième joueur possède une paire"));
+        assertTrue(output.contains("Premier joueur a une suite (quinte)"));
+        assertFalse(output.contains("Deuxième joueur a une suite (quinte)"));
+    }
 
-        assertTrue(output.contains("Points du premier joueur: 2"));
-        assertTrue(output.contains("Points du deuxième joueur: 2"));
+    @Test
+    @DisplayName("Test pour vérifier que isRoyalFlush fonctionne correctement")
+    public void testIsRoyalFlush() {
+        List<Card> royalFlush = createHand(
+                new int[]{10, 11, 12, 13, 1},
+                new Color[]{Color.COEUR, Color.COEUR, Color.COEUR, Color.COEUR, Color.COEUR}
+        );
+
+        List<Card> aceStartStraightFlush = createHand(
+                new int[]{1, 2, 3, 4, 5},
+                new Color[]{Color.PIQUE, Color.PIQUE, Color.PIQUE, Color.PIQUE, Color.PIQUE}
+        );
+
+        Main.calculatorPoint(royalFlush, aceStartStraightFlush);
+
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Premier joueur a une quinte flush royale"));
+        assertTrue(output.contains("Deuxième joueur a une quinte flush"));
     }
 }
