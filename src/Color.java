@@ -1,4 +1,4 @@
 public enum Color {
 
-    COEUR, CARREAU, PIQUE, TREFFLE
+    COEUR, CARREAU, PIQUE, TREFLE
 }

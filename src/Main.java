@@ -1,6 +1,6 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
@@ -21,7 +21,65 @@ public class Main {
             System.out.println(card.getNumber() + " de " + card.getColor());
         }
         scanner.close();
+
+        calculatorPoint(cardsFirstJoueur, cardsSecondsJoueur);
     }
+
+    private static void calculatorPoint(List<Card> cardsFirstJoueur, List<Card> cardsSecondJoueur) {
+        AtomicInteger pointsFirstJoueur = new AtomicInteger();
+        AtomicInteger pointsSecondJoueur = new AtomicInteger();
+
+        Card highestCardFirstJoueur = cardsFirstJoueur.stream()
+                .max(Comparator.comparingInt(Card::getNumber))
+                .orElse(null);
+
+        Card highestCardSecondJoueur = cardsSecondJoueur.stream()
+                .max(Comparator.comparingInt(Card::getNumber))
+                .orElse(null);
+
+        if (highestCardFirstJoueur.getNumber() > highestCardSecondJoueur.getNumber()) {
+            pointsFirstJoueur.set(1);
+            System.out.println("Premier joueur a la carte la plus haute: " + highestCardFirstJoueur.getNumber());
+        } else if (highestCardFirstJoueur.getNumber() < highestCardSecondJoueur.getNumber()) {
+            pointsSecondJoueur.set(1);
+            System.out.println("Deuxième joueur a la carte la plus haute: " + highestCardSecondJoueur.getNumber());
+        }
+
+        Map<Integer, Long> countFirstJoueur = cardsFirstJoueur.stream()
+                .collect(Collectors.groupingBy(Card::getNumber, Collectors.counting()));
+
+        Map<Integer, Long> countSecondJoueur = cardsSecondJoueur.stream()
+                .collect(Collectors.groupingBy(Card::getNumber, Collectors.counting()));
+
+        List<Integer> pairsFirstJoueur = countFirstJoueur.entrySet().stream()
+                .filter(entry -> entry.getValue() == 2)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        List<Integer> pairsSecondJoueur = countSecondJoueur.entrySet().stream()
+                .filter(entry -> entry.getValue() == 2)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        if (!pairsFirstJoueur.isEmpty()) {
+            pointsFirstJoueur.set(2);
+            System.out.println("Premier joueur possède " + pairsFirstJoueur.size() + " paire(s): " + pairsFirstJoueur);
+        } else {
+            System.out.println("Premier joueur ne possède pas de paire.");
+        }
+
+        if (!pairsSecondJoueur.isEmpty()) {
+            pointsSecondJoueur.set(2);
+            System.out.println("Deuxième joueur possède " + pairsSecondJoueur.size() + " paire(s): " + pairsSecondJoueur);
+        } else {
+            System.out.println("Deuxième joueur ne possède pas de paire.");
+        }
+
+        System.out.println("Points du premier joueur: " + pointsFirstJoueur);
+        System.out.println("Points du deuxième joueur: " + pointsSecondJoueur);
+    }
+
+
 
     public static List<Card> choisirCartesEnUneFois(Scanner scanner, List<Card> cartesAEviter) {
         List<Card> cartesChoisies = new ArrayList<>();
