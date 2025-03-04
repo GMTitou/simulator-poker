@@ -4,34 +4,26 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Bienvenue dans le simulateur de poker!");
-
-        Scanner scanner = new Scanner(System.in); // Créer un seul Scanner pour toute l'application
-
+        System.out.println("Bienvenue dans le simulatreur de poker!");
+        Scanner scanner = new Scanner(System.in);
         List<Card> cardsFirstJoueur = new ArrayList<Card>();
         List<Card> cardsSecondsJoueur = new ArrayList<Card>();
-
         System.out.println("Veuillez choisir les carte du Joueur 1");
-        cardsFirstJoueur = choisirCartesEnUneFois(scanner);
-
+        cardsFirstJoueur = choisirCartesEnUneFois(scanner, null);
         System.out.println("\nVoici les cartes que vous avez choisies:");
         for (Card card : cardsFirstJoueur) {
             System.out.println(card.getNumber() + " de " + card.getColor());
         }
-
         System.out.println("\nVeuillez maintenant choisir les carte du Joueur 2");
-        cardsSecondsJoueur = choisirCartesEnUneFois(scanner);
-
+        cardsSecondsJoueur = choisirCartesEnUneFois(scanner, cardsFirstJoueur);
         System.out.println("\nVoici les cartes que vous avez choisies:");
         for (Card card : cardsSecondsJoueur) {
             System.out.println(card.getNumber() + " de " + card.getColor());
         }
-
         scanner.close();
-
     }
 
-    public static List<Card> choisirCartesEnUneFois(Scanner scanner) {
+    public static List<Card> choisirCartesEnUneFois(Scanner scanner, List<Card> cartesAEviter) {
         List<Card> cartesChoisies = new ArrayList<>();
 
         System.out.println("Veuillez choisir 5 cartes en une seule saisie.");
@@ -39,6 +31,13 @@ public class Main {
         System.out.println("Numéro: 1 (As) à 13 (Roi)");
         System.out.println("Couleur: COEUR, CARREAU, PIQUE, TREFLE");
         System.out.println("Exemple: 1COEUR 10PIQUE 2CARREAU 5TREFLE 13COEUR");
+
+        if (cartesAEviter != null && !cartesAEviter.isEmpty()) {
+            System.out.println("\nAttention: Les cartes suivantes sont déjà prises et ne peuvent pas être choisies:");
+            for (Card card : cartesAEviter) {
+                System.out.println("- " + card.getNumber() + " de " + card.getColor());
+            }
+        }
 
         boolean saisieValide = false;
 
@@ -85,6 +84,14 @@ public class Main {
                     for (Card c : cartesTmp) {
                         if (c.getNumber() == number && c.getColor() == color) {
                             throw new IllegalArgumentException("Carte en double: " + nouvelleCarte);
+                        }
+                    }
+
+                    if (cartesAEviter != null) {
+                        for (Card c : cartesAEviter) {
+                            if (c.getNumber() == number && c.getColor() == color) {
+                                throw new IllegalArgumentException("Cette carte est déjà prise par un autre joueur: " + nouvelleCarte);
+                            }
                         }
                     }
 
