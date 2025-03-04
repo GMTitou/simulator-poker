@@ -71,6 +71,12 @@ public class Main {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
+        boolean isSameColorFirstJoueur = cardsFirstJoueur.stream()
+                .allMatch(card -> card.getColor() == cardsFirstJoueur.get(0).getColor());
+
+        boolean isSameColorSecondJoueur = cardsSecondJoueur.stream()
+                .allMatch(card -> card.getColor() == cardsSecondJoueur.get(0).getColor());
+
         if (pairsFirstJoueur.size() == 2) {
             pointsFirstJoueur.set(4);
             System.out.println("Premier joueur possède deux paires: " + pairsFirstJoueur);
@@ -92,13 +98,33 @@ public class Main {
         }
 
         if (!triplesFirstJoueur.isEmpty()) {
-            pointsFirstJoueur.set(3);
-            System.out.println("Premier joueur possède un triple: " + triplesFirstJoueur);
+            if (!pairsFirstJoueur.isEmpty()) {
+                pointsFirstJoueur.set(5);
+                System.out.println("Premier joueur possède un triple et une paire: " + triplesFirstJoueur + " et " + pairsFirstJoueur);
+            } else {
+                pointsFirstJoueur.set(3);
+                System.out.println("Premier joueur possède un triple: " + triplesFirstJoueur);
+            }
         }
 
         if (!triplesSecondJoueur.isEmpty()) {
-            pointsSecondJoueur.set(3);
-            System.out.println("Deuxième joueur possède un triple: " + triplesSecondJoueur);
+            if (!pairsSecondJoueur.isEmpty()) {
+                pointsSecondJoueur.set(5);
+                System.out.println("Deuxième joueur possède un triple et une paire: " + triplesSecondJoueur + " et " + pairsSecondJoueur);
+            } else {
+                pointsSecondJoueur.set(3);
+                System.out.println("Deuxième joueur possède un triple: " + triplesSecondJoueur);
+            }
+        }
+
+        if (isSameColorFirstJoueur) {
+            pointsFirstJoueur.set(6);
+            System.out.println("Premier joueur a une couleur: " + cardsFirstJoueur.get(0).getColor());
+        }
+
+        if (isSameColorSecondJoueur) {
+            pointsSecondJoueur.set(6);
+            System.out.println("Deuxième joueur a une couleur: " + cardsSecondJoueur.get(0).getColor());
         }
 
         System.out.println("Points du premier joueur: " + pointsFirstJoueur);
@@ -106,96 +132,96 @@ public class Main {
     }
 
     public static List<Card> choisirCartesEnUneFois(Scanner scanner, List<Card> cartesAEviter) {
-        List<Card> cartesChoisies = new ArrayList<>();
+    List<Card> cartesChoisies = new ArrayList<>();
 
-        System.out.println("Veuillez choisir 5 cartes en une seule saisie.");
-        System.out.println("Format: [numero][couleur] [numero][couleur] ...");
-        System.out.println("Numéro: 1 (As) à 13 (Roi)");
-        System.out.println("Couleur: COEUR, CARREAU, PIQUE, TREFLE");
-        System.out.println("Exemple: 1COEUR 10PIQUE 2CARREAU 5TREFLE 13COEUR");
+    System.out.println("Veuillez choisir 5 cartes en une seule saisie.");
+    System.out.println("Format: [numero][couleur] [numero][couleur] ...");
+    System.out.println("Numéro: 1 (As) à 13 (Roi)");
+    System.out.println("Couleur: COEUR, CARREAU, PIQUE, TREFLE");
+    System.out.println("Exemple: 1COEUR 10PIQUE 2CARREAU 5TREFLE 13COEUR");
 
-        if (cartesAEviter != null && !cartesAEviter.isEmpty()) {
-            System.out.println("\nAttention: Les cartes suivantes sont déjà prises et ne peuvent pas être choisies:");
-            for (Card card : cartesAEviter) {
-                System.out.println("- " + card.getNumber() + " de " + card.getColor());
-            }
+    if (cartesAEviter != null && !cartesAEviter.isEmpty()) {
+        System.out.println("\nAttention: Les cartes suivantes sont déjà prises et ne peuvent pas être choisies:");
+        for (Card card : cartesAEviter) {
+            System.out.println("- " + card.getNumber() + " de " + card.getColor());
+        }
+    }
+
+    boolean saisieValide = false;
+
+    while (!saisieValide) {
+        System.out.print("Votre main: ");
+        String input = scanner.nextLine().trim();
+        String[] cartesStr = input.split("\\s+");
+
+        if (cartesStr.length != 5) {
+            System.out.println("Erreur: Vous devez saisir exactement 5 cartes.");
+            continue;
         }
 
-        boolean saisieValide = false;
+        List<Card> cartesTmp = new ArrayList<>();
+        boolean erreurDansMain = false;
 
-        while (!saisieValide) {
-            System.out.print("Votre main: ");
-            String input = scanner.nextLine().trim();
-            String[] cartesStr = input.split("\\s+");
-
-            if (cartesStr.length != 5) {
-                System.out.println("Erreur: Vous devez saisir exactement 5 cartes.");
-                continue;
-            }
-
-            List<Card> cartesTmp = new ArrayList<>();
-            boolean erreurDansMain = false;
-
-            for (String carteStr : cartesStr) {
-                try {
-                    int i = 0;
-                    while (i < carteStr.length() && Character.isDigit(carteStr.charAt(i))) {
-                        i++;
-                    }
-
-                    if (i == 0 || i == carteStr.length()) {
-                        throw new IllegalArgumentException("Format incorrect pour " + carteStr);
-                    }
-
-                    int number = Integer.parseInt(carteStr.substring(0, i));
-                    String colorStr = carteStr.substring(i);
-
-                    if (number < 1 || number > 13) {
-                        throw new IllegalArgumentException("Le numéro doit être entre 1 (As) et 13 (Roi)");
-                    }
-
-                    Color color;
-                    try {
-                        color = Color.valueOf(colorStr.toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        throw new IllegalArgumentException("Couleur invalide: " + colorStr);
-                    }
-
-                    Card nouvelleCarte = new Card(number, color);
-
-                    for (Card c : cartesTmp) {
-                        if (c.getNumber() == number && c.getColor() == color) {
-                            throw new IllegalArgumentException("Carte en double: " + nouvelleCarte);
-                        }
-                    }
-
-                    if (cartesAEviter != null) {
-                        for (Card c : cartesAEviter) {
-                            if (c.getNumber() == number && c.getColor() == color) {
-                                throw new IllegalArgumentException("Cette carte est déjà prise par un autre joueur: " + nouvelleCarte);
-                            }
-                        }
-                    }
-
-                    cartesTmp.add(nouvelleCarte);
-
-                } catch (NumberFormatException e) {
-                    System.out.println("Erreur: Numéro de carte invalide dans " + carteStr);
-                    erreurDansMain = true;
-                    break;
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Erreur: " + e.getMessage());
-                    erreurDansMain = true;
-                    break;
+        for (String carteStr : cartesStr) {
+            try {
+                int i = 0;
+                while (i < carteStr.length() && Character.isDigit(carteStr.charAt(i))) {
+                    i++;
                 }
-            }
 
-            if (!erreurDansMain) {
-                cartesChoisies = cartesTmp;
-                saisieValide = true;
+                if (i == 0 || i == carteStr.length()) {
+                    throw new IllegalArgumentException("Format incorrect pour " + carteStr);
+                }
+
+                int number = Integer.parseInt(carteStr.substring(0, i));
+                String colorStr = carteStr.substring(i);
+
+                if (number < 1 || number > 13) {
+                    throw new IllegalArgumentException("Le numéro doit être entre 1 (As) et 13 (Roi)");
+                }
+
+                Color color;
+                try {
+                    color = Color.valueOf(colorStr.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Couleur invalide: " + colorStr);
+                }
+
+                Card nouvelleCarte = new Card(number, color);
+
+                for (Card c : cartesTmp) {
+                    if (c.getNumber() == number && c.getColor() == color) {
+                        throw new IllegalArgumentException("Carte en double: " + nouvelleCarte);
+                    }
+                }
+
+                if (cartesAEviter != null) {
+                    for (Card c : cartesAEviter) {
+                        if (c.getNumber() == number && c.getColor() == color) {
+                            throw new IllegalArgumentException("Cette carte est déjà prise par un autre joueur: " + nouvelleCarte);
+                        }
+                    }
+                }
+
+                cartesTmp.add(nouvelleCarte);
+
+            } catch (NumberFormatException e) {
+                System.out.println("Erreur: Numéro de carte invalide dans " + carteStr);
+                erreurDansMain = true;
+                break;
+            } catch (IllegalArgumentException e) {
+                System.out.println("Erreur: " + e.getMessage());
+                erreurDansMain = true;
+                break;
             }
         }
 
-        return cartesChoisies;
+        if (!erreurDansMain) {
+            cartesChoisies = cartesTmp;
+            saisieValide = true;
+        }
+    }
+
+    return cartesChoisies;
     }
 }
