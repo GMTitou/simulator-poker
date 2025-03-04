@@ -51,13 +51,23 @@ public class Main {
         Map<Integer, Long> countSecondJoueur = cardsSecondJoueur.stream()
                 .collect(Collectors.groupingBy(Card::getNumber, Collectors.counting()));
 
+        List<Integer> triplesFirstJoueur = countFirstJoueur.entrySet().stream()
+                .filter(entry -> entry.getValue() == 3)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        List<Integer> triplesSecondJoueur = countSecondJoueur.entrySet().stream()
+                .filter(entry -> entry.getValue() == 3)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
         List<Integer> pairsFirstJoueur = countFirstJoueur.entrySet().stream()
-                .filter(entry -> entry.getValue() == 2)
+                .filter(entry -> entry.getValue() == 2 && !triplesFirstJoueur.contains(entry.getKey()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
         List<Integer> pairsSecondJoueur = countSecondJoueur.entrySet().stream()
-                .filter(entry -> entry.getValue() == 2)
+                .filter(entry -> entry.getValue() == 2 && !triplesSecondJoueur.contains(entry.getKey()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
@@ -81,12 +91,19 @@ public class Main {
             System.out.println("Deuxième joueur ne possède pas de paire.");
         }
 
+        if (!triplesFirstJoueur.isEmpty()) {
+            pointsFirstJoueur.set(3);
+            System.out.println("Premier joueur possède un triple: " + triplesFirstJoueur);
+        }
+
+        if (!triplesSecondJoueur.isEmpty()) {
+            pointsSecondJoueur.set(3);
+            System.out.println("Deuxième joueur possède un triple: " + triplesSecondJoueur);
+        }
+
         System.out.println("Points du premier joueur: " + pointsFirstJoueur);
         System.out.println("Points du deuxième joueur: " + pointsSecondJoueur);
     }
-
-
-
 
     public static List<Card> choisirCartesEnUneFois(Scanner scanner, List<Card> cartesAEviter) {
         List<Card> cartesChoisies = new ArrayList<>();
